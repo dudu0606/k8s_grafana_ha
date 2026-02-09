@@ -1,0 +1,56 @@
+services:
+  # O banco de dados que armazenará as configurações de ambos os Grafanas
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_shared
+    environment:
+      POSTGRES_USER: grafana_user
+      POSTGRES_PASSWORD: grafana_password
+      POSTGRES_DB: grafana_metadata
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - grafana_net
+
+  # Instância 01: Focada em Edição (Porta 3000)
+  grafana_editor:
+    image: grafana/grafana-oss:latest
+    container_name: grafana_editor
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres_db:5432
+      - GF_DATABASE_NAME=grafana_metadata
+      - GF_DATABASE_USER=grafana_user
+      - GF_DATABASE_PASSWORD=grafana_password
+    depends_on:
+      - postgres_db
+    networks:
+      - grafana_net
+
+  # Instância 02: Focada em Visualização (Porta 3001)
+  grafana_viewer:
+    image: grafana/grafana-oss:latest
+    container_name: grafana_viewer
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres_db:5432
+      - GF_DATABASE_NAME=grafana_metadata
+      - GF_DATABASE_USER=grafana_user
+      - GF_DATABASE_PASSWORD=grafana_password
+      # Exemplo de trava para a instância de View (opcional)
+      - GF_USERS_AUTO_ASSIGN_ORG_ROLE=Viewer
+    depends_on:
+      - postgres_db
+    networks:
+      - grafana_net
+
+volumes:
+  pg_data:
+
+networks:
+  grafana_net:
+    driver: bridge
