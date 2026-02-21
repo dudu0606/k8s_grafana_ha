@@ -1,4 +1,3 @@
-# postgres-pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -9,5 +8,6 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: "" # Deixe vazio para casar com o PVC padrão
   hostPath:
-    path: "/mnt/data/postgres" # A pasta onde os dados vão morar no seu Worker
+    path: "/mnt/data/postgres"
