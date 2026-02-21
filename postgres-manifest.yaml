@@ -1,4 +1,14 @@
-# postgres-manifest.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,6 +35,15 @@ spec:
           value: grafana_password
         ports:
         - containerPort: 5432
+        # --- ADICIONADO AQUI ---
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+      # --- ADICIONADO AQUI ---
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
 ---
 apiVersion: v1
 kind: Service
